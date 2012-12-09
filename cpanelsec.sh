@@ -1,7 +1,10 @@
 #!/bin/bash
 
-PS1='\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$'
+PS1='â•­â”€\[\033[01m\][ \[\033[01;34m\]\u@\h \[\033[00m\]\[\033[01m\]] \[\033[01;32m\]\w\[\033[00m\]\nâ•°â”€âž¤ '
+
 unalias cp
+unalias vi
+
 
 pwnmail()
 {
@@ -11,14 +14,6 @@ pwnmail()
     fi
 
     exim -bp | grep -B1 "$1" | grep '<.*>' | awk '{print $3}' | while read line; do exim -Mrm $line; done
-}
-
-
-cmscheck()
-{
-    wget http://server.cmsversion.com/checktest.sh
-    sh checktest.sh
-    rm checktest.sh -f
 }
 
 
@@ -59,7 +54,7 @@ injectcleaner()
 
 sysinfo()
 {
-    echo '[===SYSTEM BUILD===]'; uname -a; echo '[===LANGUAGE HANDLERS===]'; /usr/local/cpanel/bin/rebuild_phpconf --current; echo '[===PHP CONFIG===]'; egrep -i "(disable_fun)"  /usr/local/lib/php.ini | sed 's/;//'; echo '[===FIREWALL STATUS===]'; egrep "(SMTP_BLOCK|SMTP_ALLOWLOCAL|SMTP_PORTS)[[:space:]]?=" /etc/csf/csf.conf; csf -v; echo '[===EMAIL STATUS===]'; echo Emails per Hour: $(cat /var/cpanel/maxemailsperhour); echo Emails in Queue: $(exim -bpc); echo '[===RESOURCE ALLOCATION===]'; OUT=$(/usr/local/cpanel/bin/dcpumonview | grep -v Top | sed -e 's#<[^>]*># #g' | while read i ; do NF=`echo $i | awk {'print NF'}` ; if [[ "$NF" == "5" ]] ; then USER=`echo $i | awk '{print $1}'`; OWNER=`grep -e "^OWNER=" /var/cpanel/users/$USER | cut -d= -f2` ; echo "$OWNER $i"; fi ; done) ; (echo "USER CPU" ; echo "$OUT" | sort -nrk4 | awk '{print $2,$4}' | head -5) | column -t ; echo; (echo -e "USER MEMORY" ; echo "$OUT" | sort -nrk5 | awk '{print $2,$5}' | head -5) | column -t; echo '[===ESTABLISHED CONNECTIONS===]'; PORTS=([80]=Apache [110]=POP3 [143]=IMAP [25]=SMTP [26]=SMTP [21]=FTP); netstat -plan > /root/stats.txt; for port in ${!PORTS[*]}; do echo "$(tput bold)${PORTS[$port]}($port):$(tput sgr0)"; grep $port /root/stats.txt | awk {'print $5'} | grep -Po "\d{1,3}(?:\.\d{1,3}){3}" | sort -n -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4 | uniq -c | sort -nk 1 | grep -v "0.0.0.0" | tail -5 | awk '{ if ( $1 > 35 ) { printf "\033[1;31m" } else if ( $1 > 25 ) { printf "\033[1;33m" } else { printf "\033[1;32m" } ; print " ", $1, "\033[0;39m", $2 }'; done; rm -f /root/stats.txt; echo '[===CONNECTIONS BY DOMAIN===]';  lynx -dump -width=200 localhost/whm-server-status | grep 'POST\|GET' | awk '{print $12}' | sort | uniq -c; echo '[===DISK ALLOCATION===]'; df -h; echo '[===INODE AUDIT===]'; cat /etc/domainusers | cut -f1 -d: | sort -nk1 | while read USER; do quota -s $USER; done | grep '[0-9]k' -B 2 | grep -v "-" | grep '[0-9]k' -B 2; echo '[===EXCLUDED USERS===]'; cat /etc/cpbackup-userskip.conf; screen -ls; cat /etc/cpspamd.conf;
+    echo '[===SYSTEM BUILD===]'; uname -a; echo '[===LANGUAGE HANDLERS===]'; /usr/local/cpanel/bin/rebuild_phpconf --current; echo '[===PHP CONFIG===]'; egrep -i "(disable_fun)"  /usr/local/lib/php.ini | sed 's/;//'; echo '[===FIREWALL STATUS===]'; egrep "(SMTP_BLOCK|SMTP_ALLOWLOCAL|SMTP_PORTS)[[:space:]]?=" /etc/csf/csf.conf; csf -v; echo '[===EMAIL STATUS===]'; echo Emails per Hour: $(cat /var/cpanel/maxemailsperhour); echo Emails in Queue: $(exim -bpc); echo '[===RESOURCE ALLOCATION===]'; OUT=$(/usr/loca<Plug>(neocomplcache_start_auto_complete)l/cpanel/bin/dcpumonview | grep -v Top | sed -e 's#<[^>]*># #g' | while read i ; do NF=`echo $i | awk {'print NF'}` ; if [[ "$NF" == "5" ]] ; then USER=`echo $i | awk '{print $1}'`; OWNER=`grep -e "^OWNER=" /var/cpanel/users/$USER | cut -d= -f2` ; echo "$OWNER $i"; fi ; done) ; (echo "USER CPU" ; echo "$OUT" | sort -nrk4 | awk '{print $2,$4}' | head -5) | column -t ; echo; (echo -e "USER MEMORY" ; echo "$OUT" | sort -nrk5 | awk '{print $2,$5}' | head -5) | column -t; echo '[===ESTABLISHED CONNECTIONS===]'; PORTS=([80]=Apache [110]=POP3 [143]=IMAP [25]=SMTP [26]=SMTP [21]=FTP); netstat -plan > /root/stats.txt; for port in ${!PORTS[*]}; do echo "$(tput bold)${PORTS[$port]}($port):$(tput sgr0)"; grep $port /root/stats.txt | awk {'print $5'} | grep -Po "\d{1,3}(?:\.\d{1,3}){3}" | sort -n -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4 | uniq -c | sort -nk 1 | grep -v "0.0.0.0" | tail -5 | awk '{ if ( $1 > 35 ) { printf "\033[1;31m" } else if ( $1 > 25 ) { printf "\033[1;33m" } else { printf "\033[1;32m" } ; print " ", $1, "\033[0;39m", $2 }'; done; rm -f /root/stats.txt; echo '[===CONNECTIONS BY DOMAIN===]';  lynx -dump -width=200 localhost/whm-server-status | grep 'POST\|GET' | awk '{print $12}' | sort | uniq -c; echo '[===DISK ALLOCATION===]'; df -h; echo '[===INODE AUDIT===]'; cat /etc/domainusers | cut -f1 -d: | sort -nk1 | while read USER; do quota -s $USER; done | grep '[0-9]k' -B 2 | grep -v "-" | grep '[0-9]k' -B 2; echo '[===EXCLUDED USERS===]'; cat /etc/cpbackup-userskip.conf; screen -ls; cat /etc/cpspamd.conf;
 }
 
 
@@ -82,6 +77,7 @@ secimgdir()
     echo ".htaccess edited."
 }
 
+
 grepuser()
 {
     if [ -z "$1" ];then
@@ -91,6 +87,7 @@ grepuser()
 
     grep "$1" /etc/userdomains
 }
+
 
 trafficstats()
 {
@@ -107,12 +104,13 @@ trafficstats()
 
     
 
-	local BEGIN=`head -n1 /etc/httpd/domlogs/"$1" | awk '{print $4$5}'`
-	local END=`tail -n1 /etc/httpd/domlogs/"$1" | awk '{print $4$5}'`
-	local HITS=`wc -l /etc/httpd/domlogs/"$1"| awk '{print $1}'`
+    local BEGIN=`head -n1 /etc/httpd/domlogs/"$1" | awk '{print $4$5}'`
+    local END=`tail -n1 /etc/httpd/domlogs/"$1" | awk '{print $4$5}'`
+    local HITS=`wc -l /etc/httpd/domlogs/"$1"| awk '{print $1}'`
 
-	echo "From $BEGIN to $END there were $HITS hits for $1"
+    echo "From $BEGIN to $END there were $HITS hits for $1"
 }
+
 
 _trafficstats()
 {
@@ -124,15 +122,22 @@ _trafficstats()
 
 complete -o nospace -F _trafficstats trafficstats
 
+
 alias dcpumonview="/usr/local/cpanel/bin/dcpumonview"
 alias mc="exim -bpc"
 alias m="exim -bp"
-alias chkmailabuse="less /var/log/exim_mainlog | grep sendmail | grep -v csf | grep -v FCron"
+alias chkmailabuse='less /var/log/exim_mainlog | grep sendmail | grep -vE "csf|FCron"'
 alias grep="grep --color=auto"
-alias ll='ls -l --color=tty'
+alias ll='ls -Al --color=tty'
 alias vb='exim -Mvb'
 alias vh='exim -Mvh'
 alias vl='exim -Mvl'
+
+
+showusage()
+{
+    du -k * | sort -nr | cut -f2- | xargs du -hs
+}
 
 owner()
 {
@@ -149,7 +154,7 @@ complete -o nospace -F _www owner
 pwn()
 {
     if [ -z "$1" ];then
-        echo "Usage: pwn FILE"
+        echo "Usage: pwn FILES"
         return
     fi
 
@@ -161,16 +166,36 @@ pwn()
 }
 
 
+unpwn()
+{
+    if [ -z "$1" ];then
+        echo "Usage: unpwn FILES"
+        return
+    fi
+
+    until [ -z "$1" ];do
+        if [ -d "$1" ];then
+            chmod 755 "$1"
+        else
+            chmod 644 "$1"
+        fi
+
+        chown `pwd | cut -d/ -f3`:`pwd | cut -d/ -f3` "$1"
+        shift
+    done
+}
+
+
 fixperms()
 {
-    find -type f ! -perm 000 -exec chmod 644 {} \;
+    find -type f ! -perm 000 -exec bash -c 'if [[ "$1" =~ "wp-config.php" || "$1" =~ "configuration.php" ]];then chmod 600 "$1";else chmod 644 "$1";fi' bash '{}' \;
     find -type d ! -perm 000 -exec chmod 755 {} \;
 }
 
 
 rmsymlinks()
 {
-    find -type l -exec rm {} \;
+    find -type l -exec unlink {} \;
 }
 
 
@@ -203,6 +228,10 @@ complete -o nospace -F _www addspf
 
 chpass()
 {
+    if [ -z "${ALLOW_PASSWORD_CHANGE+xxx}" ];then
+        export ALLOW_PASSWORD_CHANGE=1
+    fi
+
     if [ -z "$1" ];then
         echo "Usage: chpass USER"
         return
@@ -230,51 +259,32 @@ beachheadfinder()
 
 qgrep()
 {
+    local OPTIND
+    local OPTARG
 
-    while getopts ":fplh" opt; do
+    while getopts ":plsc:" opt; do
         case $opt in
-            p  ) local NONULL='! -perm 000' ;;
-            l  ) local LFILES="EHl" ;;
-            f  ) local FULLSRCH=1 ;;
-            h  ) local HACKSRCH=1 ;;
-            \? ) echo "Usage: qgrep [-f (full)] [-l (list)] [-h (hack|shell) ] [-p (no perm 000) ] [search str]"
-                return
+            p ) local NONULL='! -perm 000' ;;
+            l ) local LFILES='-EHil' ;;
+            s ) local SHLLSRCH="(c3284|filesman|r57shell|default_action|tryag)";;
+            c ) local SHLLSRCH="($OPTARG)";;
+        : ) echo "-$OPTARG requires an argument";return 1;;
+            \? ) echo "Usage: qgrep [-l (list files)] [-s (shells) ] [-p (no perm 000) ] [-c SEARCHSTR]"
+                return 1;;
         esac
     done
 
-    local GREPARGS=${LFILES:-"EH"}
-    local FINDARGS=${NONULL:-""}
+    GREPARGS=${LFILES:-'-EHi'}
+    ARGS1=${NONULL:-''}
+    SEARCH=${SHLLSRCH:-"(gzinflate|base64_decode)"}
 
-    shift $(($OPTIND - 1))
+    find $ARGS1 -regex ".*\.\(htm\|html\|php\|inc\|tmp\|js\|htaccess\|pl\)" -print0 | xargs -0 grep $GREPARGS $SEARCH --color=auto 
 
-    if [ -z "$1" ];then
-        if [ ! -z "$HACKSRCH" ];then
-            find ${FINDARGS} -regex ".*\.\(htm\|html\|php\|inc\|tmp\|js\|htaccess\|pl\)" | xargs grep -${GREPARGS} '(hack|shell)' --color=auto 2> /dev/null
-            return
-        elif [ ! -z "$FULLSRCH" ];then
-            find ${FINDARGS} -regex ".*\.\(htm\|html\|php\|inc\|tmp\|js\|htaccess\|pl\)" | xargs grep -${GREPARGS} '(eval\(|preg_replace|gunzip|gzinflate|base64_decode|chmod|fwrite)' --color=auto 
-            return
-        else
-            find ${FINDARGS} -regex ".*\.\(htm\|html\|php\|inc\|tmp\|js\|htaccess\|pl\)" | xargs grep -${GREPARGS} '(gzinflate|base64_decode)' --color=auto 2> /dev/null
-            return
-        fi
-    else
-        find ${FINDARGS} -regex ".*\.\(htm\|html\|php\|inc\|tmp\|js\|htaccess\|pl\)" | xargs grep -${GREPARGS} '($1)' --color=auto 2> /dev/null
-        return
-    fi
+    return 0
 }
 
 
-cpanel()
-{
-    if [ -z "$1" ];then
-        echo "Usage: cpanel GREPSTRING"
-        return
-    fi
-
-    grep $1 /usr/local/cpanel/logs/access_log | grep --color=auto -E '"(POST|GET) .*(doadddomain|xfercpanel|live_statfiles|live_fileop|passwd|upload-ajax|editit|doupload|domkdir|upload\.html|/file\.html|\/scripts5\/wwwacct\?sign).* HTTP/[[:digit:].]+"';
-}    
-
+complete -o nospace -F _www d7monview
 
 chkbackup()
 {    
@@ -316,15 +326,83 @@ chkbackup()
 
 }
 
-lsandrew()
+
+vzsuspend()
 {
-    echo -e "pwnmail STRING\ncmscheck\naddspf USER\ninjectcleaner [-l] [-b] PATTERN [FILE|LIST]\nsysinfo\ninodebreakdown\nsecimgdr"
-    echo -e "grepuser USER\ntrafficstats [-f] DOMAIN\npwn FILE\nfixperms\nrmsymlinks\nwww USER\nchpass USER\nchkmailabuse\nbeachheadfinder"
-    echo -e "qgrep [-f (full)] [-l (list)] [-h (hack|shell) ] [-p (no perm 000) ] [search str]"
-    echo -e "cpanel GREPSTR\nchkbackup FILE\nowner USER\n"
+    if [ -z "$1" ];then
+        echo "Usage: vzsuspend VEID"
+        return
+    fi
+
+    vzlist -a | grep "$1" 1> /dev/null
+
+    if [ "$?" -ne 0 ];then
+        echo "VEID $1 not found!"
+        return
+    fi
+
+    local HOSTNAME=`vzlist -a | grep "$1" | awk '{print $5}'`
+
+    vzctl set "$1" --hostname HD-SUSPENDED-"$HOSTNAME" --save
+    vzctl stop "$1" --fast
+    vzctl set "$1" --disabled yes --save
 }
 
 
+vzunsuspend()
+{
+    if [ -z "$1" ];then
+        echo "Usage: vzunsuspend VEID"
+        return
+    fi
 
+    vzlist -a | grep "$1" 1> /dev/null
 
+    if [ "$?" -ne 0 ];then
+        echo "VEID $1 not found!"
+        return
+    fi
 
+    vzctl set "$1" --disabled no --save
+
+    local HOSTNAME=`vzlist -a | grep "$1" | awk '{print $5}' | awk -F'HD-SUSPENDED-' '{print $1}'`
+
+    vzctl set "$1" --hostname "$HOSTNAME" --save
+    vzctl start "$1"
+}
+
+adddkim()
+{
+
+    if [ -z "$1" ];then
+        echo "Usage: adddkim USER"
+        return
+    fi
+
+    if [ -e /usr/local/cpanel/bin/domain_keys_installer ];then
+        /usr/local/cpanel/bin/domain_keys_installer "$1"
+        echo "Added domain keys for user $1"
+    else
+        /usr/local/cpanel/bin/dkim_keys_install "$1"
+        echo "Added DKIM for user $1"
+    fi
+}
+
+complete -o nospace -F _www adddkim
+
+function checkapache() 
+{ 
+    if [[ `strings /usr/local/apache/bin/httpd |  grep "UnhardenedSymLinks\|UnsecuredSymLinks"` != '' ]]; then 
+        echo -e  "Apache \033[0;32mis patched\033[m\017 against SYMLINK attacks."; 
+    else  echo -e "Apache is \033[0;31mNOT PATCHED\033[m\017 against SYMLINK  attacks."; 
+    fi 
+} 
+
+lsandrew()
+{
+    echo -e "pwnmail STRING\ncmscheck\naddspf USER\nupdatemodsec\ninjectcleaner [-l] [-b] PATTERN [FILE|LIST]\nsysinfo\ninodebreakdown\nsecimgdr"
+    echo -e "grepuser USER\ntrafficstats [-f] DOMAIN\npwn FILE\nfixperms\nrmsymlinks\nwww USER\nchpass USER\nchkmailabuse\nbeachheadfinder"
+    echo -e "qgrep [-f (full)] [-l (list)] [-h (hack|shell) ] [-p (no perm 000) ] [search str]"
+    echo -e "aShellScanner\njsecure\ncpanel GREPSTR\nfastscan\nd7monview USER\nchkbackup FILE\nowner USER\nvzsuspend VEID\nvzunsuspend VEID"
+    echo -e "adddkim USER\nshowusage\nunpwn USERS\nblist IP\n"
+}
