@@ -1,0 +1,8 @@
+Spamcop;bl.spamcop.net;http://www.spamcop.net/bl.shtml
+CBL;cbl.abuseat.org;http://cbl.abuseat.org/lookup.cgi
+Barracuda;b.barracudacentral.org;http://www.barracudacentral.org/rbl/removal-request
+Spamhaus;zen.spamhaus.org;http://www.spamhaus.org/lookup/
+PSBL;psbl.surriel.com;http://psbl.org/listing
+Backscatterer;ips.backscatterer.org;http://www.backscatterer.org/?target=test
+Mailspike;bl.mailspike.net;http://mailspike.org/iplookup.html
+SORBS;dnsbl.sorbs.net;http://www.sorbs.net/lookup.shtml

@@ -25,7 +25,7 @@ with -l
 quotas for users.
 
 **inodebreakdown**: If inode restrictions are in place this will give a pretty accurate listing
-of folders containing to most inodes for abuse notices.
+of folders containing the most inodes for abuse notices.
 
 **chkmailabuse**: Shows scripts sending out mail, useful for finding malicious
 files blasting out spam.
