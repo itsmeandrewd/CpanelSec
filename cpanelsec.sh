@@ -1,8 +1,29 @@
 #!/bin/bash
 
-PS1='╭─\[\033[01m\][ \[\033[01;34m\]\u@\h \[\033[00m\]\[\033[01m\]] \[\033[01;32m\]\w\[\033[00m\]\n╰─➤ ' 
+INSTALLDIR='/root/cpanelsec'
+
+yellow=$(tput setaf 3)
+blue=$(tput setaf 4)
+lblue=$(tput setaf 6)
+reset=$(tput sgr0)
+red=$(tput setaf 1)
+white=$(tput setaf 7)
+
+PS1="┌─[\[$blue\]\u \[$lblue\]\h\[$reset\]] - [\[$white\]\w\[$reset\]] - [\[$yellow\]\D{%Y-%m-%d} \t\[$reset\]]\n└─[\[$red\]$(echo \$?)\[$reset\]] "
 unalias cp 
 unalias vi 
+alias ag="${HOME}/ag --no-numbers"
+
+ag_check() {
+
+    if [ -f "${INSTALLDIR}/ag" ];then
+        return
+    fi
+
+    echo "Please install the Silver Surfer"
+    return
+}
+
 
 pwnmail() {
     if [ -z "$1" ]; then
@@ -29,29 +50,66 @@ addspf() {
 }
 
 
-hazexploit() {
-    php exploitdb.php "$@"
-}
-
 
 cmspass() {
  
     if [ "$1" = "-r" ];then
-        find -maxdepth 4 -type d -exec php cmspass {} 2> /dev/null \;
+        find -maxdepth 4 -type d -exec php "$INSTALLDIR"/cmspass {} 2> /dev/null \;
     else
-        php cmspass.php "$@"
+        php "$INSTALLDIR"/cmspass.php "$@"
     fi
 
 }
 
 
 injectcleaner() {
-    python pyclean.py "$@"
+    python "$INSTALLDIR"/pyclean.py "$@"
 }
 
 
 sysinfo() {
-    echo '[===SYSTEM BUILD===]'; uname -a; echo '[===LANGUAGE HANDLERS===]'; /usr/local/cpanel/bin/rebuild_phpconf --current; echo '[===PHP CONFIG===]'; egrep -i "(disable_fun)"  /usr/local/lib/php.ini | sed 's/;//'; echo '[===FIREWALL STATUS===]'; egrep "(SMTP_BLOCK|SMTP_ALLOWLOCAL|SMTP_PORTS)[[:space:]]?=" /etc/csf/csf.conf; csf -v; echo '[===EMAIL STATUS===]'; echo Emails per Hour: $(cat /var/cpanel/maxemailsperhour); echo Emails in Queue: $(exim -bpc); echo '[===RESOURCE ALLOCATION===]'; OUT=$(/usr/local/cpanel/bin/dcpumonview | grep -v Top | sed -e 's#<[^>]*># #g' | while read i ; do NF=`echo $i | awk {'print NF'}` ; if [[ "$NF" == "5" ]] ; then USER=`echo $i | awk '{print $1}'`; OWNER=`grep -e "^OWNER=" /var/cpanel/users/$USER | cut -d= -f2` ; echo "$OWNER $i"; fi ; done) ; (echo "USER CPU" ; echo "$OUT" | sort -nrk4 | awk '{print $2,$4}' | head -5) | column -t ; echo; (echo -e "USER MEMORY" ; echo "$OUT" | sort -nrk5 | awk '{print $2,$5}' | head -5) | column -t; echo '[===ESTABLISHED CONNECTIONS===]'; PORTS=([80]=Apache [110]=POP3 [143]=IMAP [25]=SMTP [26]=SMTP [21]=FTP); netstat -plan > /root/stats.txt; for port in ${!PORTS[*]}; do echo "$(tput bold)${PORTS[$port]}($port):$(tput sgr0)"; grep $port /root/stats.txt | awk {'print $5'} | grep -Po "\d{1,3}(?:\.\d{1,3}){3}" | sort -n -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4 | uniq -c | sort -nk 1 | grep -v "0.0.0.0" | tail -5 | awk '{ if ( $1 > 35 ) { printf "\033[1;31m" } else if ( $1 > 25 ) { printf "\033[1;33m" } else { printf "\033[1;32m" } ; print " ", $1, "\033[0;39m", $2 }'; done; rm -f /root/stats.txt; echo '[===CONNECTIONS BY DOMAIN===]';  lynx -dump -width=200 localhost/whm-server-status | grep 'POST\|GET' | awk '{print $12}' | sort | uniq -c; echo '[===DISK ALLOCATION===]'; df -h; echo '[===INODE AUDIT===]'; cat /etc/domainusers | cut -f1 -d: | sort -nk1 | while read USER; do quota -s $USER; done | grep '[0-9]k' -B 2 | grep -v "-" | grep '[0-9]k' -B 2; echo '[===EXCLUDED USERS===]'; cat /etc/cpbackup-userskip.conf; screen -ls; cat /etc/cpspamd.conf;
+    echo '[===SYSTEM BUILD===]' 
+    uname -a 
+
+    echo '[===LANGUAGE HANDLERS===]' 
+    /usr/local/cpanel/bin/rebuild_phpconf --current 
+    
+    echo '[===PHP CONFIG===]' 
+    egrep -i "(disable_fun)"  /usr/local/lib/php.ini | sed 's/;//' 
+    
+    echo '[===FIREWALL STATUS===]' 
+    egrep "(SMTP_BLOCK|SMTP_ALLOWLOCAL|SMTP_PORTS)[[:space:]]?=" /etc/csf/csf.conf 
+    csf -v 
+    
+    echo '[===EMAIL STATUS===]' 
+    echo Emails per Hour: $(cat /var/cpanel/maxemailsperhour) 
+    echo Emails in Queue: $(exim -bpc) 
+    echo '[===RESOURCE ALLOCATION===]' 
+    OUT=$(/usr/local/cpanel/bin/dcpumonview | grep -v Top | sed -e 's#<[^>]*># #g' | while read i ; do NF=`echo $i | awk {'print NF'}` ; if [[ "$NF" == "5" ]] ; then USER=`echo $i | awk '{print $1}'`; OWNER=`grep -e "^OWNER=" /var/cpanel/users/$USER | cut -d= -f2` ; echo "$OWNER $i"; fi ; done) ; (echo "USER CPU" ; echo "$OUT" | sort -nrk4 | awk '{print $2,$4}' | head -5) | column -t ; echo; (echo -e "USER MEMORY" ; echo "$OUT" | sort -nrk5 | awk '{print $2,$5}' | head -5) | column -t 
+    
+    echo '[===ESTABLISHED CONNECTIONS===]' 
+    PORTS=([80]=Apache [110]=POP3 [143]=IMAP [25]=SMTP [26]=SMTP [21]=FTP) 
+    netstat -plan > "$INSTALLDIR"/stats.txt 
+    for port in ${!PORTS[*]} 
+    do 
+        echo "$(tput bold)${PORTS[$port]}($port):$(tput sgr0)" 
+        grep $port "$INSTALLDIR"/stats.txt | awk {'print $5'} | grep -Po "\d{1,3}(?:\.\d{1,3}){3}" | sort -n -t . -k 1,1 -k 2,2 -k 3,3 -k 4,4 | uniq -c | sort -nk 1 | grep -v "0.0.0.0" | tail -5 | awk '{ if ( $1 > 35 ) { printf "\033[1;31m" } else if ( $1 > 25 ) { printf "\033[1;33m" } else { printf "\033[1;32m" } ; print " ", $1, "\033[0;39m", $2 }'
+    done; 
+    rm -f "$INSTALLDIR"/stats.txt 
+    
+    echo '[===CONNECTIONS BY DOMAIN===]'
+    lynx -dump -width=200 localhost/whm-server-status | grep 'POST\|GET' | awk '{print $12}' | sort | uniq -c 
+    
+    echo '[===DISK ALLOCATION===]' 
+    df -h 
+
+    echo '[===INODE AUDIT===]' 
+    cat /etc/domainusers | cut -f1 -d: | sort -nk1 | while read USER; do quota -s $USER; done | grep '[0-9]k' -B 2 | grep -v "-" | grep '[0-9]k' -B 2 
+    
+    echo '[===EXCLUDED USERS===]' 
+    cat /etc/cpbackup-userskip.conf 
+    screen -ls 
+    cat /etc/cpspamd.conf
 
 }
 
@@ -110,7 +168,7 @@ alias mc="exim -bpc"
 alias m="exim -bp" 
 alias chkmailabuse='less /var/log/exim_mainlog | grep sendmail | grep -vE "csf|FCron"' 
 alias grep="grep --color=auto" 
-alias ll='ls -Alh --color=tty' 
+alias ll='/bin/ls -AlhF --color=tty' 
 alias vb='exim -Mvb' 
 alias vh='exim -Mvh' 
 alias vl='exim -Mvl' 
@@ -211,17 +269,6 @@ chpass() {
 
 complete -o nospace -F _www chpass 
 
-beachheadfinder() {
-    screen -A -a -d -m -L -t 'Beach-Head Finder' -S 'bhfinder' /bin/bash -c "find /home* -type d \( -path '/home*/virtfs' -or -path '/home*/.cpan' -or -path '/home*/.cpanm' -or 
--path '/home*/cpeasyapache' -or -path '/home*/cpapachebuild' -or -path '/home*/cpphpbuild' -or -path '/home*/cpzendinstall' \) -prune -false -or -type l -not -lname 
-'public_html' -not -lname '/usr/local/apache/domlogs/*' -not -path '/home*/*/mail/.*' -not -lname '/home*/*/.rvsitebuilder/projects/*' -not -lname 
-'/var/cpanel/rvglobalsoft/rvsitebuilder/*' -not -lname '/var/netenberg/click_be/*' -not -lname '*/.click_be/database/' -not -lname '*/.click_be/advertisements/' -not -lname 
-'*/.click_be/click_be/' -not -lname '*/.click_be/backup/' -not -lname '/usr/local/urchin/*' -not \( -path '/home*/*/wp-content/advanced-cache.php' -and -lname 
-'/home*/wp-content/plugins/*' \) -not \( -path '/home*/rvadmin/public_html/rvadmin/themeimages/tran' -and -lname '/usr/local/cpanel/base/frontend/*/themeimages/tran' \) -printf 
-'%p => %l\n\c' -fprintf '/dev/stderr' '%p => %l\n\c' 2>> /root/found_links.txt"
-}
-
-
 qgrep() {
 
     local OPTIND
@@ -230,7 +277,7 @@ qgrep() {
         case $opt in
             p ) local NONULL='! -perm 000' ;;
             l ) local LFILES='-EHil' ;;
-            s ) local SHLLSRCH="(c3284|psbt|iframe.name.twitter.scrolling|mjdu|gdsg|filesman|system.file.do.not.delete|2e922c|r57shell|default_use_ajax|tryag_vb|priv8|@error_reporting\(0\))";;
+            s ) local SHLLSRCH="($(cat "$INSTALLDIR"/shell_patterns) | tr ' ' '|')";;
             c ) local SHLLSRCH="($OPTARG)";;
             : ) echo "-$OPTARG requires an argument";return 1;;
             \? ) echo "Usage: qgrep [-l (list files)] [-s (shells) ] [-p (no perm 000) ] [-c SEARCHSTR]"
@@ -246,10 +293,38 @@ qgrep() {
 }
 
 
+qgrep_ag() {
+
+    ag_check
+
+    local OPTIND
+    local OPTARG
+    while getopts ":plsc:" opt; do
+        case $opt in
+            p ) local NONULL='! -perm 000' ;;
+            l ) local LFILES='-il' ;;
+            s ) local SHLLSRCH="($(cat "INSTALLDIR"/shell_patterns) | tr ' ' '|')";;
+            c ) local SHLLSRCH="($OPTARG)";;
+            : ) echo "-$OPTARG requires an argument";return 1;;
+            \? ) echo "Usage: qgrep [-l (list files)] [-s (shells) ] [-p (no perm 000) ] [-c SEARCHSTR]"
+                return 1;;
+        esac
+    done
+
+    GREPARGS=${LFILES:-'-i'}
+    ARGS1=${NONULL:-''}
+    SEARCH=${SHLLSRCH:-"(gzinflate|base64_decode)"}
+    find -type f $ARGS1 -regex ".*\.\(htm\|html\|shtml\|asp\|php\|inc\|tmp\|js\|htaccess\|pl\)" -print0 | xargs -0 "${HOME}/ag" --no-numbers --noheading $GREPARGS $SEARCH 2> /dev/null
+    return 0
+}
+
+
 shellscan() {
 
-    if [ -f /root/possible_shells.txt ];then
-        rm /root/possible_shells.txt -f
+    pushd .
+
+    if [ -f "$INSTALLDIR"/possible_shells.txt ];then
+        rm "$INSTALLDIR"/possible_shells.txt -f
     fi
 
     SCAN_ARGS="-ps"
@@ -262,16 +337,43 @@ shellscan() {
     fi
 
     for i in /var/cpanel/users/*;do
-        echo -e "\n===\n$(basename $i)\n===\n" | tee -a /root/possible_shells.txt
-        cd /home/$(basename $i)/public_html
+        echo -e "\n===\n$(basename $i)\n===\n" | tee -a "$INSTALLDIR"/possible_shells.txt
+        cd /home/"$(basename $i)"/public_html
         if [ $? -eq 0 ];then
-            qgrep $SCAN_ARGS | tee -a /root/possible_shells.txt
+            qgrep $SCAN_ARGS | tee -a "$INSTALLDIR"/possible_shells.txt
         fi
     done
+
+
+    popd
 }
 
 
-complete -o nospace -F _www d7monview 
+shellscan_ag() {
+
+    ag_check
+
+    if [ -f "$INSTALLDIR"/possible_shells.txt ];then
+        rm "$INSTALLDIR"/possible_shells.txt -f
+    fi
+
+    SCAN_ARGS="-ps"
+    if [ ! -z "$1" ];then
+        if [ "$1" == "base64" ];then
+            SCAN_ARGS="-p"
+        else
+            SCAN_ARGS="-c $1"
+        fi
+    fi
+
+    for i in /var/cpanel/users/*;do
+        echo -e "\n===\n$(basename $i)\n===\n" | tee -a "$INSTALLDIR"/possible_shells.txt
+        cd /home/$(basename $i)/public_html
+        if [ $? -eq 0 ];then
+            qgrep_ag $SCAN_ARGS | tee -a "$INSTALLDIR"/possible_shells.txt
+        fi
+    done
+}
 
 
 chkbackup() {
@@ -361,14 +463,9 @@ adddkim() {
 complete -o nospace -F _www adddkim 
 
 
-ServerAudit() {
-    python audit.py "$!"
-}
-
-
 check_rbl() {
     
-    python checkrbl.py "$1"
+    "$INSTALLDIR"/checkrbl.py "$1"
 }
 
 
@@ -376,7 +473,7 @@ alias vzusage="vzlist -o ctid,laverage,hostname"
 
 
 mitigate_ddos() {
-    python mitigate_ddos.py
+    python "$INSTALLDIR"/mitigate_ddos.py
 }
 
 
@@ -438,6 +535,7 @@ switchmailip() {
     newip=${IPs[$[ $choice - 1 ]]}
     echo "new IP is $newip"
 
+    chattr -ai /etc/mailips
     sed -i '/^\*:/d' /etc/mailips
     sed -i '/per_domain_mailips/d' /etc/exim.conf.localopts
     if [ "$newip" == "$mainIP" ];then
@@ -453,6 +551,8 @@ switchmailip() {
 
     /scripts/buildeximconf 1> /dev/null
     service exim restart
+
+    chattr +ai /etc/mailips
 }
 
 rdns_check() {
@@ -481,7 +581,7 @@ rdns_check() {
     fi
 }
 
-alias phishing_scams='grep -iE "ebay|chase|hotmail|yahoo|gmail|google|remax|fidelity|santander|visa|amazon|paypal|mastercard|signin" /etc/userdomains'
+alias phishing_scams='grep -iE "ebay|chase|webscr|hotmail|yahoo|gmail|google|remax|fidelity|santander|visa|amazon|paypal|mastercard|signin" /etc/userdomains'
 
 scramble_email() {
     
@@ -519,18 +619,21 @@ train_sa() {
     su "$1" -s /bin/bash -c "sa-learn --sync"
     rm auto-whitelist 2> /dev/null
 
-    echo "Please enter the email account with SPAM-TRAIN and HAM-TRAIN folder"
+    echo "Please enter the email account with SPAM-TRAIN and HAM-TRAIN folders"
     read email
 
     USER=$(echo $email | cut -d'@' -f1)
     DOMAIN=$(echo $email | cut -d'@' -f2)
 
-    if [[ ! -d /home/"$1"/mail/"$DOMAIN"/"$USER"/.SPAM-TRAIN || ! -d /home/"$1"/mail/"$DOMAIN"/"$USER"/.HAM_TRAIN ]];then
+    if [[ ! -d /home/"$1"/mail/"$DOMAIN"/"$USER"/.SPAM-TRAIN || ! -d /home/"$1"/mail/"$DOMAIN"/"$USER"/.HAM-TRAIN ]];then
         echo "Could not find HAM-TRAIN or SPAM-TRAIN folders!"
         return
     fi
 
+    echo -e "\nTraining with SPAM-TRAIN tokens:"
     su "$1" -s /bin/bash -c "sa-learn --progress --spam /home/$1/mail/$DOMAIN/$USER/.SPAM-TRAIN/cur"
+
+    echo -e "\nTraining with HAM-TRAIN tokens:"
     su "$1" -s /bin/bash -c "sa-learn --progress --ham /home/$1/mail/$DOMAIN/$USER/.HAM-TRAIN/cur"
 
     sed -i '/use_auto_whitelist/d' /home/"$1"/.spamassassin/user_prefs
@@ -546,11 +649,11 @@ train_sa() {
 
 complete -o nospace -F _www train_sa
 
-lsandrew() {
-    echo -e "pwnmail STRING\ncmscheck\naddspf USER\nupdatemodsec\ninjectcleaner [-l] [-b] PATTERN [FILE|LIST]\nsysinfo\ninodebreakdown\nsecimgdr"
-    echo -e "grepuser USER\ntrafficstats [-f] DOMAIN\npwn FILE\nfixperms\nrmsymlinks\nwww USER\nchpass USER\nchkmailabuse\nbeachheadfinder"
+lscpanelsec() {
+    echo -e "pwnmail STRING\ncmscheck\naddspf USER\ninjectcleaner [-l] [-b] PATTERN [FILE|LIST]\nsysinfo\ninodebreakdown\nsecimgdr"
+    echo -e "grepuser USER\ntrafficstats [-f] DOMAIN\npwn FILE\nfixperms\nrmsymlinks\nwww USER\nchpass USER\nchkmailabuse"
     echo -e "qgrep [-f (full)] [-l (list)] [-h (hack|shell) ] [-p (no perm 000) ] [search str]"
-    echo -e "jsecure\nchkbackup FILE\nowner USER\nvzsuspend VEID\nvzunsuspend VEID"
-    echo -e "adddkim USER\nunpwn USERS\nvzusage\nmitigate_ddos\ncheck_rbl\npwnoldmail\ncheckmail"
+    echo -e "chkbackup FILE\nowner USER\nvzsuspend VEID\nvzunsuspend VEID"
+    echo -e "adddkim USER\nshowusage\nunpwn USERS\nvzusage\nmitigate_ddos\ncheck_rbl\npwnoldmail\ncheckmail"
     echo -e "phishing_scams\nrdns_check\nswitchmailip\nscramble_email EMAIL\ntrain_sa USER"
 }

@@ -1,8 +1,11 @@
-Spamcop;bl.spamcop.net;http://www.spamcop.net/bl.shtml
-CBL;cbl.abuseat.org;http://cbl.abuseat.org/lookup.cgi
-Barracuda;b.barracudacentral.org;http://www.barracudacentral.org/rbl/removal-request
-Spamhaus;zen.spamhaus.org;http://www.spamhaus.org/lookup/
-PSBL;psbl.surriel.com;http://psbl.org/listing
 Backscatterer;ips.backscatterer.org;http://www.backscatterer.org/?target=test
+Barracuda;b.barracudacentral.org;http://www.barracudacentral.org/rbl/removal-request
+CBL;cbl.abuseat.org;http://cbl.abuseat.org/lookup.cgi
+Lashback;ubl.unsubscore.com;http://www.lashback.com/blacklist/
 Mailspike;bl.mailspike.net;http://mailspike.org/iplookup.html
-SORBS;dnsbl.sorbs.net;http://www.sorbs.net/lookup.shtml
+McAfee;cidr.bl.mcafee.com;stub
+PSBL;psbl.surriel.com;http://psbl.org/listing
+Senderscore;bl.score.senderscore.com;https://www.senderscore.org/blacklistlookup/
+SORBS;spam.dnsbl.sorbs.net;http://www.sorbs.net/lookup.shtml
+Spamcop;bl.spamcop.net;http://www.spamcop.net/bl.shtml
+Spamhaus;zen.spamhaus.org;http://www.spamhaus.org/lookup/

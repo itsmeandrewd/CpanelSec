@@ -75,12 +75,6 @@ class WpCMS extends BaseCMS {
         unlink('./wpresstmp.php');
     }
 
-    // what is this hack you say? WordPress was horribly designed so that when
-    // you include wp-config.php the entire WordPress backend is loaded as well.
-    // Maybe all you want to do is change a password, but this script may 
-    // fail because of a syntax error at wp-content/plugins/somethingrandom/data/system.php
-    // line 37... :(  so I create a temp wp-config.php which loads no further files
-    // so we can at least change the damn password
     protected function wphack($confFile) {
         $tmp = './wpresstmp.php';
         copy($confFile, $tmp);
@@ -159,8 +153,6 @@ class CMSFactory {
     }
 }
 
-// for our basic purposes we don't really need to use the PHP option parser
-// (also its terrible)
 $dir = ".";
 if (sizeof($argv) > 1) {
     $dir = $argv[1];
